@@ -1,0 +1,58 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  text-align: center;
+  padding: 2rem;
+  background: radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.08), transparent 25%),
+    radial-gradient(circle at 90% 10%, rgba(45, 212, 191, 0.1), transparent 20%);
+}
+
+.app-header {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.logo-row {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+}
+
+.logo {
+  height: 80px;
+  transition: transform 150ms ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.logo.react {
+  filter: drop-shadow(0 0 1.5rem rgba(97, 218, 251, 0.4));
+}
+
+.subtitle {
+  color: #475569;
+  margin: 0;
+}
+
+.app-main {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  padding: 2rem;
+  margin: 0 auto;
+  max-width: 560px;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+  background: #0ea5e914;
+  padding: 0.2rem 0.35rem;
+  border-radius: 0.35rem;
+}
