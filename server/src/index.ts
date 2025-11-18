@@ -1,7 +1,9 @@
 import cors from 'cors';
 import express from 'express';
-import env from './config/env.js';
-import { connectDB } from './config/db.js';
+import mongoose from 'mongoose';
+import authRouter from './routes/auth.js';
+
+dotenv.config();
 
 const app = express();
 
@@ -14,6 +16,7 @@ app.use(
   }),
 );
 app.use(express.json());
+app.use('/api/auth', authRouter);
 
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
