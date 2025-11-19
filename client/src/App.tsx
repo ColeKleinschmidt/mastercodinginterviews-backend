@@ -1,3 +1,8 @@
+import './App.css';
+import Session from './pages/Session';
+
+function App() {
+  return <Session />;
 import React, { useCallback, useEffect, useState } from 'react';
 import './App.css';
 import Practice from './pages/Practice';
