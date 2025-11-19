@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import '../App.css';
 
 type QuestionType = 'coding' | 'code-output';
@@ -97,6 +98,7 @@ const readFiltersFromQuery = () => {
 
 const Session = () => {
   const initialFilters = useMemo(() => readFiltersFromQuery(), []);
+  const { token } = useAuth();
   const [questionInstanceId, setQuestionInstanceId] = useState('');
   const [question, setQuestion] = useState<QuestionPayload | null>(null);
   const [loading, setLoading] = useState(false);
@@ -127,14 +129,20 @@ const Session = () => {
     setSelectedOption('');
 
     try {
-      const params = new URLSearchParams();
-      if (initialFilters.difficulty) params.set('difficulty', initialFilters.difficulty);
-      if (initialFilters.language) params.set('language', initialFilters.language);
-      if (initialFilters.questionType) params.set('type', initialFilters.questionType);
-      const url = params.toString()
-        ? `/api/questions/next?${params.toString()}`
-        : '/api/questions/next';
-      const response = await fetch(url);
+      const payload = {
+        type: (initialFilters.questionType as QuestionType) || 'coding',
+        difficulty: initialFilters.difficulty || undefined,
+        language: initialFilters.language || undefined,
+      };
+
+      const response = await fetch('/api/questions/next', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify(payload),
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch the next question');
       }
@@ -148,7 +156,7 @@ const Session = () => {
     } finally {
       setLoading(false);
     }
-  }, [initialFilters.difficulty, initialFilters.language, initialFilters.questionType]);
+  }, [initialFilters.difficulty, initialFilters.language, initialFilters.questionType, token]);
 
   useEffect(() => {
     fetchNextQuestion();
@@ -185,7 +193,10 @@ const Session = () => {
         setSubmitting(true);
         const response = await fetch('/api/questions/submit', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify(payload),
         });
 
@@ -201,7 +212,7 @@ const Session = () => {
         setSubmitting(false);
       }
     },
-    [composeAnswer, question, questionInstanceId, startTime, submissionResult]
+    [composeAnswer, question, questionInstanceId, startTime, submissionResult, token]
   );
 
   const handleTimeout = useCallback(() => {
@@ -363,45 +374,3 @@ const Session = () => {
 };
 
 export default Session;
-import React from 'react';
-import { usePractice } from '../context/PracticeContext';
-
-type SessionProps = {
-  onBackToFilters: () => void;
-};
-
-export default function Session({ onBackToFilters }: SessionProps) {
-  const { filters } = usePractice();
-
-  return (
-    <div className="session-card">
-      <p className="eyebrow">Session summary</p>
-      <h1>Your practice session is ready</h1>
-      <p className="lead">We saved your filters so you can jump right back in.</p>
-
-      <div className="selected-list">
-        <div>
-          <p className="label">Question type</p>
-          <p className="value">{filters.questionType}</p>
-        </div>
-        <div>
-          <p className="label">Difficulty</p>
-          <p className="value">{filters.difficulty}</p>
-        </div>
-        <div>
-          <p className="label">Language</p>
-          <p className="value">{filters.language}</p>
-        </div>
-      </div>
-
-      <div className="actions-row">
-        <button type="button" className="secondary" onClick={onBackToFilters}>
-          Adjust filters
-        </button>
-        <button type="button" className="primary" disabled>
-          Begin practice
-        </button>
-      </div>
-    </div>
-  );
-}
