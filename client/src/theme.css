@@ -1,0 +1,50 @@
+:root {
+  --color-primary: #f97316;
+  --color-primary-strong: #ea580c;
+  --color-secondary: #7e22ce;
+  --color-secondary-strong: #6b21a8;
+  --color-surface: #ffffff;
+  --color-muted: #475569;
+  --color-border: #e2e8f0;
+  --color-bg: #0f172a08;
+}
+
+body {
+  background: radial-gradient(circle at 20% 20%, #f9731614, transparent 40%),
+    radial-gradient(circle at 80% 0%, #7e22ce12, transparent 35%),
+    #f8fafc;
+  color: #0f172a;
+}
+
+button,
+.button {
+  cursor: pointer;
+  font-weight: 600;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.7rem 1.2rem;
+  transition: transform 120ms ease, box-shadow 160ms ease;
+}
+
+.button-primary {
+  background: linear-gradient(120deg, var(--color-primary), var(--color-secondary));
+  color: #ffffff;
+  box-shadow: 0 12px 30px rgba(249, 115, 22, 0.18);
+}
+
+.button-secondary {
+  background: #ffffff;
+  color: var(--color-secondary);
+  border: 1px solid var(--color-border);
+}
+
+.button:hover,
+button:hover {
+  transform: translateY(-1px);
+}
+
+.button:active,
+button:active {
+  transform: translateY(0px);
+  box-shadow: none;
+}
