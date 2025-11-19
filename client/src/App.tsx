@@ -1,3 +1,4 @@
+import Dashboard from './pages/Dashboard';
 import { NavLink, Route, Routes, useParams } from 'react-router-dom';
 import './App.css';
 import { BrowserRouter, Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
@@ -164,6 +165,10 @@ const History = () => (
 
 function App() {
   return (
+    <div className="app-shell">
+      <div className="app-frame">
+        <Dashboard />
+      </div>
     <AuthProvider>
       <BrowserRouter>
         <div className="app-shell">
