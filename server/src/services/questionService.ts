@@ -39,6 +39,17 @@ export interface QuestionAttempt {
   submittedAt?: Date;
 }
 
+export interface AccuracySegment {
+  label: string;
+  accuracy: number;
+}
+
+export interface UserSummary {
+  totalAttempts: number;
+  accuracyPerDifficulty: AccuracySegment[];
+  accuracyByType: AccuracySegment[];
+}
+
 const questionInstances = new Map<string, QuestionInstance>();
 const questionAttempts = new Map<string, QuestionAttempt>();
 
@@ -137,4 +148,33 @@ export const getAttemptById = (id: string, userId: string) => {
     return null;
   }
   return attempt;
+};
+
+const buildAccuracySegments = (attempts: QuestionAttempt[], key: 'difficulty' | 'type'): AccuracySegment[] => {
+  const stats = new Map<string, { correct: number; total: number }>();
+
+  for (const attempt of attempts) {
+    const label = (attempt[key] as string | undefined)?.trim() || 'Unknown';
+    const bucket = stats.get(label) ?? { correct: 0, total: 0 };
+    bucket.total += 1;
+    if (attempt.correct) {
+      bucket.correct += 1;
+    }
+    stats.set(label, bucket);
+  }
+
+  return Array.from(stats.entries()).map(([label, { correct, total }]) => ({
+    label,
+    accuracy: total === 0 ? 0 : Math.round((correct / total) * 100),
+  }));
+};
+
+export const getUserSummary = (userId: string): UserSummary => {
+  const attempts = getUserAttempts(userId);
+
+  return {
+    totalAttempts: attempts.length,
+    accuracyPerDifficulty: buildAccuracySegments(attempts, 'difficulty'),
+    accuracyByType: buildAccuracySegments(attempts, 'type'),
+  };
 };

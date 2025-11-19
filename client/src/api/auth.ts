@@ -32,6 +32,15 @@ export const setAuthToken = (token: string | null) => {
   }
 };
 
+const isUserEnvelope = (value: unknown): value is { user: AuthUser } => {
+  return Boolean(
+    value &&
+    typeof value === 'object' &&
+    'user' in value &&
+    (value as { user?: AuthUser }).user,
+  );
+};
+
 export const signup = async (payload: { name: string; email: string; password: string }) => {
   const { data } = await client.post<AuthResponse>('/signup', payload);
   return data;
@@ -43,8 +52,11 @@ export const login = async (payload: { email: string; password: string }) => {
 };
 
 export const fetchCurrentUser = async () => {
-  const { data } = await client.get<AuthUser>('/me');
-  return data;
+  const { data } = await client.get<AuthResponse | { user: AuthUser } | AuthUser>('/me');
+  if (isUserEnvelope(data)) {
+    return data.user;
+  }
+  return data as AuthUser;
 };
 
 export const extractErrorMessage = (error: unknown) => {

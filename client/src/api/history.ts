@@ -1,3 +1,5 @@
+import { getStoredToken } from './auth';
+
 export interface AccuracySegment {
   label: string;
   accuracy: number;
@@ -77,6 +79,30 @@ const demoAttempts: Attempt[] = [
   },
 ];
 
+const withAuthHeaders = (headers: HeadersInit = {}) => {
+  const token = getStoredToken();
+  if (!token) return headers;
+
+  if (headers instanceof Headers) {
+    headers.set('Authorization', `Bearer ${token}`);
+    return headers;
+  }
+
+  if (Array.isArray(headers)) {
+    return [...headers, ['Authorization', `Bearer ${token}`]] as HeadersInit;
+  }
+
+  return {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+  } satisfies HeadersInit;
+};
+
+const authorizedFetch = (input: RequestInfo | URL, init?: RequestInit) => {
+  const headers = withAuthHeaders(init?.headers);
+  return fetch(input, { ...init, headers });
+};
+
 const normalizeSegments = (
   value: unknown,
   fallback: AccuracySegment[] = [],
@@ -130,13 +156,13 @@ const buildSummaryFromPayload = (payload: any): HistorySummary => {
 
 export const fetchHistorySummary = async (): Promise<HistorySummary> => {
   try {
-    const response = await fetch('/api/history/summary');
+    const response = await authorizedFetch('/api/history/summary');
     if (response.ok) {
       const payload = await response.json();
       return buildSummaryFromPayload(payload);
     }
 
-    const fallbackResponse = await fetch('/api/auth/me');
+    const fallbackResponse = await authorizedFetch('/api/auth/me');
     if (fallbackResponse.ok) {
       const payload = await fallbackResponse.json();
       return buildSummaryFromPayload(payload);
@@ -150,7 +176,7 @@ export const fetchHistorySummary = async (): Promise<HistorySummary> => {
 
 export const fetchRecentAttempts = async (limit = 10): Promise<Attempt[]> => {
   try {
-    const response = await fetch(`/api/history?limit=${limit}`);
+    const response = await authorizedFetch(`/api/history?limit=${limit}`);
     if (response.ok) {
       const payload = await response.json();
       const attempts = Array.isArray(payload?.attempts) ? payload.attempts : payload;
