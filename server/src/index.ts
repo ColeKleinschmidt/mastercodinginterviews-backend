@@ -1,16 +1,27 @@
 import cors from 'cors';
-import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
+import historyRouter from './routes/history.js';
+import questionsRouter from './routes/questions.js';
+import authRouter from './routes/auth.js';
 
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mastercodinginterviews';
 
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      'https://mastercodinginterviews.com',
+      'https://www.mastercodinginterviews.com',
+    ],
+  }),
+);
 app.use(express.json());
+app.use('/api/auth', authRouter);
+
+app.use('/api/questions', questionsRouter);
+app.use('/api/history', historyRouter);
 
 app.get('/', (_req, res) => {
   res.json({ message: 'Master Coding Interviews API is running' });
@@ -18,13 +29,16 @@ app.get('/', (_req, res) => {
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok' });
 });
 
 const startServer = async () => {
   try {
-    await mongoose.connect(MONGO_URI);
-    app.listen(PORT, () => {
-      console.log(`Server listening on port ${PORT}`);
+    await connectDB();
+
+    app.listen(env.PORT, () => {
+      console.log(`Server listening on port ${env.PORT}`);
     });
   } catch (error) {
     console.error('Failed to start server', error);
