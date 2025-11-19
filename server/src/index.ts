@@ -1,6 +1,8 @@
 import cors from 'cors';
 import express from 'express';
 import mongoose from 'mongoose';
+import historyRouter from './routes/history.js';
+import questionsRouter from './routes/questions.js';
 import authRouter from './routes/auth.js';
 
 dotenv.config();
@@ -18,6 +20,15 @@ app.use(
 app.use(express.json());
 app.use('/api/auth', authRouter);
 
+app.use('/api/questions', questionsRouter);
+app.use('/api/history', historyRouter);
+
+app.get('/', (_req, res) => {
+  res.json({ message: 'Master Coding Interviews API is running' });
+});
+
+app.get('/health', (_req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
