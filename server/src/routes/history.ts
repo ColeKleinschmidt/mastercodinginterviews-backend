@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth.js';
-import { getAttemptById, getUserAttempts } from '../services/questionService.js';
+import { getAttemptById, getUserAttempts, getUserSummary } from '../services/questionService.js';
 
 const router = Router();
 
@@ -25,6 +25,15 @@ router.get('/', authMiddleware, (req, res) => {
     totalPages,
     totalItems,
   });
+});
+
+router.get('/summary', authMiddleware, (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  const summary = getUserSummary(req.user.id);
+  res.json(summary);
 });
 
 router.get('/:id', authMiddleware, (req, res) => {
