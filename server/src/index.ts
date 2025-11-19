@@ -1,25 +1,31 @@
 import cors from 'cors';
+import dotenv from 'dotenv';
 import express from 'express';
-import mongoose from 'mongoose';
+import { connectDB } from './config/db.js';
+import env from './config/env.js';
+import authRouter from './routes/auth.js';
 import historyRouter from './routes/history.js';
 import questionsRouter from './routes/questions.js';
-import authRouter from './routes/auth.js';
 
 dotenv.config();
 
 const app = express();
 
+const allowedOrigins = [
+  'https://mastercodinginterviews.com',
+  'https://www.mastercodinginterviews.com',
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+].filter((origin): origin is string => Boolean(origin));
+
 app.use(
   cors({
-    origin: [
-      'https://mastercodinginterviews.com',
-      'https://www.mastercodinginterviews.com',
-    ],
+    origin: allowedOrigins,
   }),
 );
 app.use(express.json());
-app.use('/api/auth', authRouter);
 
+app.use('/api/auth', authRouter);
 app.use('/api/questions', questionsRouter);
 app.use('/api/history', historyRouter);
 
@@ -29,6 +35,8 @@ app.get('/', (_req, res) => {
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok' });
 });
