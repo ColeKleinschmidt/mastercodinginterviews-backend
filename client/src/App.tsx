@@ -1,26 +1,76 @@
-import viteLogo from '/vite.svg';
-import reactLogo from './assets/react.svg';
+import React, { useCallback, useEffect, useState } from 'react';
 import './App.css';
+import Practice from './pages/Practice';
+import Session from './pages/Session';
+import { PracticeProvider } from './context/PracticeContext';
 
-function App() {
+type Path = '/practice' | '/session';
+
+function normalizePath(pathname: string): Path {
+  if (pathname === '/session') {
+    return '/session';
+  }
+  return '/practice';
+}
+
+function usePathNavigation() {
+  const [path, setPath] = useState<Path>(normalizePath(window.location.pathname));
+
+  useEffect(() => {
+    const handler = () => {
+      setPath(normalizePath(window.location.pathname));
+    };
+
+    window.addEventListener('popstate', handler);
+    return () => window.removeEventListener('popstate', handler);
+  }, []);
+
+  const navigate = useCallback(
+    (nextPath: Path) => {
+      if (path === nextPath) return;
+      window.history.pushState({}, '', nextPath);
+      setPath(nextPath);
+    },
+    [path],
+  );
+
+  useEffect(() => {
+    if (window.location.pathname === '/') {
+      navigate('/practice');
+    }
+  }, [navigate]);
+
+  return { path, navigate };
+}
+
+function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="app">
       <header className="app-header">
-        <div className="logo-row">
-          <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-            <img src={viteLogo} className="logo" alt="Vite logo" />
-          </a>
-          <a href="https://react.dev" target="_blank" rel="noreferrer">
-            <img src={reactLogo} className="logo react" alt="React logo" />
-          </a>
+        <div>
+          <p className="eyebrow">Master Coding Interviews</p>
+          <h1>Practice hub</h1>
+          <p className="subtitle">Choose your filters and jump into a focused practice session.</p>
         </div>
-        <h1>Master Coding Interviews</h1>
-        <p className="subtitle">Frontend scaffold powered by Vite + React + TypeScript</p>
       </header>
-      <main className="app-main">
-        <p>Start building interview-ready experiences from <code>client/src</code>.</p>
-      </main>
+      <main className="app-main">{children}</main>
     </div>
+  );
+}
+
+function App() {
+  const { path, navigate } = usePathNavigation();
+
+  return (
+    <PracticeProvider>
+      <Layout>
+        {path === '/session' ? (
+          <Session onBackToFilters={() => navigate('/practice')} />
+        ) : (
+          <Practice onStart={() => navigate('/session')} />
+        )}
+      </Layout>
+    </PracticeProvider>
   );
 }
 
